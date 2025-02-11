@@ -43,6 +43,9 @@ public class PointDetail extends BaseEntity {
 	@Column(nullable = false)
 	private LocalDateTime processDate;
 
+	@Column(nullable = false)
+	private LocalDateTime expireDate;
+
 	// 여태까지 쌓아온 포인트의 합
 	@Column(nullable = false, precision = 19, scale = 2)
 	private BigDecimal depositSum = BigDecimal.ZERO;
@@ -55,6 +58,7 @@ public class PointDetail extends BaseEntity {
 		setUserId(userId);
 		this.amount = BigDecimal.ZERO;
 		this.processDate = LocalDateTime.now();
+		this.expireDate = processDate.plusYears(1);
 	}
 
 	public static PointDetail createInitial(String userId) {
@@ -81,6 +85,7 @@ public class PointDetail extends BaseEntity {
 			PointType.POINT_USE,
 			this.userId,
 			processDate,
+			processDate.plusYears(1),
 			this.depositSum,
 			this.withdrawSum.subtract(amount)
 		);
@@ -91,13 +96,15 @@ public class PointDetail extends BaseEntity {
 			throw new InvalidAmountException();
 		}
 		return new PointDetail(amount, PointType.POINT_ACCUMULATE, this.userId, processDate,
-			this.depositSum.add(amount), this.withdrawSum);
+			processDate.plusYears(1), this.depositSum.add(amount), this.withdrawSum);
 	}
 
 	private PointDetail(BigDecimal amount, PointType pointType, String userId, LocalDateTime processDate,
+		LocalDateTime expireDate,
 		BigDecimal depositSum, BigDecimal withdrawSum) {
 		this.amount = setAmount(amount);
 		this.pointType = pointType;
+		this.expireDate = expireDate;
 		setUserId(userId);
 		this.processDate = processDate;
 		this.depositSum = setAmount(depositSum);

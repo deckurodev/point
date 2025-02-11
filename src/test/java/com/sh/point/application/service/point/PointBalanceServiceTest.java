@@ -7,7 +7,6 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -24,9 +23,6 @@ class PointBalanceServiceTest {
 	@Mock
 	private PointDetailRepository pointDetailRepository;
 
-	@Mock
-	private TimeProvider timeProvider;
-
 	@InjectMocks
 	private PointBalanceService pointBalanceService;
 
@@ -34,20 +30,13 @@ class PointBalanceServiceTest {
 	private final LocalDateTime fixedNow = LocalDateTime.now();
 	private final LocalDateTime oneYearAgo = fixedNow.minusYears(1);
 
-	@BeforeEach
-	void setUp() {
-		when(timeProvider.now()).thenReturn(fixedNow);
-	}
-
 	@Test
 	void 만료금액이_없고_현재_잔액을_조회할_경우_남은_금액만_반환해야한다() {
 		// given
 		PointDetail latestDetail = mock(PointDetail.class);
 		when(latestDetail.calculateAvailableBalanceWithOutExpiredAmount()).thenReturn(BigDecimal.valueOf(1000));
 		when(pointDetailRepository.findTopByUserIdOrderByIdDesc(userId)).thenReturn(Optional.of(latestDetail));
-		when(pointDetailRepository.findTopByUserIdAndProcessDateBeforeOrderByProcessDateDesc(userId, oneYearAgo))
-			.thenReturn(Optional.empty());
-
+		when(pointDetailRepository.findExpiredPointSum(userId)).thenReturn(BigDecimal.ZERO);
 		// when
 		PointBalanceResponse response = pointBalanceService.getAvailableBalance(userId);
 
@@ -62,12 +51,8 @@ class PointBalanceServiceTest {
 		PointDetail latestDetail = mock(PointDetail.class);
 		when(latestDetail.calculateAvailableBalanceWithOutExpiredAmount()).thenReturn(BigDecimal.valueOf(1000));
 
-		PointDetail expireDetail = mock(PointDetail.class);
-		when(expireDetail.getDepositSum()).thenReturn(BigDecimal.valueOf(200));
-
 		when(pointDetailRepository.findTopByUserIdOrderByIdDesc(userId)).thenReturn(Optional.of(latestDetail));
-		when(pointDetailRepository.findTopByUserIdAndProcessDateBeforeOrderByProcessDateDesc(userId, oneYearAgo))
-			.thenReturn(Optional.of(expireDetail));
+		when(pointDetailRepository.findExpiredPointSum(userId)).thenReturn(BigDecimal.valueOf(200));
 
 		// when
 		PointBalanceResponse response = pointBalanceService.getAvailableBalance(userId);
@@ -81,9 +66,7 @@ class PointBalanceServiceTest {
 	void 적립_금액이_없는경우_0원을_반환해야한다() {
 		// given
 		when(pointDetailRepository.findTopByUserIdOrderByIdDesc(userId)).thenReturn(Optional.empty());
-		when(pointDetailRepository.findTopByUserIdAndProcessDateBeforeOrderByProcessDateDesc(userId, oneYearAgo))
-			.thenReturn(Optional.empty());
-
+		when(pointDetailRepository.findExpiredPointSum(userId)).thenReturn(BigDecimal.ZERO);
 		// when
 		PointBalanceResponse response = pointBalanceService.getAvailableBalance(userId);
 

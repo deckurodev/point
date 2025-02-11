@@ -9,7 +9,6 @@ public enum PointType {
 	POINT_ACCUMULATE("적립", "포인트 적립"),
 	POINT_USE("사용", "포인트 사용"),
 	POINT_CANCEL("취소", "포인트 취소"),
-	POINT_EXPIRED("만료", "포인트 만료"),
 	;
 	private final String name;
 	private final String description;
