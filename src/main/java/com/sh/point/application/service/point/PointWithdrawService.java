@@ -21,8 +21,7 @@ public class PointWithdrawService {
 
 	@DistributedLock(key = "#request.userId")
 	public void withdrawPoints(WithdrawPointServiceRequest request) {
-		LocalDateTime now = timeProvider.now();
-		LocalDateTime oneYearAgo = now.minusYears(1);
+		LocalDateTime now = timeProvider.getCurrentTime();
 
 		// 현재 포인트 내역 조회
 		PointDetail latestDetail = pointDetailRepository.findTopByUserIdOrderByIdDesc(request.userId())

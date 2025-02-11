@@ -28,7 +28,6 @@ class PointBalanceServiceTest {
 
 	private final String userId = "testUser";
 	private final LocalDateTime fixedNow = LocalDateTime.now();
-	private final LocalDateTime oneYearAgo = fixedNow.minusYears(1);
 
 	@Test
 	void 만료금액이_없고_현재_잔액을_조회할_경우_남은_금액만_반환해야한다() {

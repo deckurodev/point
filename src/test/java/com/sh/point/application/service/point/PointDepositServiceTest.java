@@ -36,7 +36,7 @@ class PointDepositServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		when(timeProvider.now()).thenReturn(mockTime);
+		when(timeProvider.getCurrentTime()).thenReturn(mockTime);
 	}
 
 	@Test

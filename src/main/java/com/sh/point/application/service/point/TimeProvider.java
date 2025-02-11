@@ -1,12 +1,21 @@
 package com.sh.point.application.service.point;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
-@Component
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+
+@Repository
 public class TimeProvider {
-	public LocalDateTime now() {
-		return LocalDateTime.now();
+
+	@PersistenceContext
+	private EntityManager entityManager;
+
+	public LocalDateTime getCurrentTime() {
+		Timestamp timestamp = (Timestamp)entityManager.createNativeQuery("SELECT NOW()").getSingleResult();
+		return timestamp.toLocalDateTime();
 	}
 }
