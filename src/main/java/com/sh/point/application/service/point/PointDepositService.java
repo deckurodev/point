@@ -19,6 +19,7 @@ public class PointDepositService {
 	public void depositPoints(DepositPointServiceRequest request) {
 		PointDetail lastPointDetail = pointDetailRepository.findTopByUserIdOrderByIdDesc(request.userId())
 			.orElseGet(() -> PointDetail.createInitial(request.userId()));
+
 		PointDetail deposit = lastPointDetail.deposit(request.amount(), timeProvider.getCurrentTime());
 		pointDetailRepository.save(deposit);
 	}

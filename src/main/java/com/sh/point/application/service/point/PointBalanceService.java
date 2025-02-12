@@ -24,13 +24,13 @@ public class PointBalanceService {
 
 		BigDecimal expiredPointSum = pointDetailRepository.findExpiredPointSum(userId);
 
-		// 만료 금액을 제외한다. (1년전 사용 할수 있는 모든 금액은 만료되어야 하므로)
-		BigDecimal balance = getBigDecimal(latestDetail, expiredPointSum);
+		// 만료 금액을 제외한다.
+		BigDecimal balance = calculateBalance(latestDetail, expiredPointSum);
 
 		return new PointBalanceResponse(userId, balance);
 	}
 
-	private static BigDecimal getBigDecimal(PointDetail latestDetail, BigDecimal expiredPointSum) {
+	private static BigDecimal calculateBalance(PointDetail latestDetail, BigDecimal expiredPointSum) {
 		BigDecimal balance = latestDetail.calculateAvailableBalanceWithOutExpiredAmount().subtract(expiredPointSum);
 
 		if (balance.compareTo(BigDecimal.ZERO) < 0) {

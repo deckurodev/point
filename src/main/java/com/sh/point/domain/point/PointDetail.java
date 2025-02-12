@@ -35,7 +35,7 @@ public class PointDetail extends BaseEntity {
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
-	private PointType pointType;
+	private PointTransactionType pointTransactionType;
 
 	@Column(nullable = false, length = 50)
 	private String userId;
@@ -61,6 +61,24 @@ public class PointDetail extends BaseEntity {
 		this.expireDate = processDate.plusYears(1);
 	}
 
+	private PointDetail(
+		BigDecimal amount,
+		PointTransactionType pointTransactionType,
+		String userId,
+		LocalDateTime processDate,
+		LocalDateTime expireDate,
+		BigDecimal depositSum,
+		BigDecimal withdrawSum
+	) {
+		this.amount = setAmount(amount);
+		this.pointTransactionType = pointTransactionType;
+		this.expireDate = expireDate;
+		setUserId(userId);
+		this.processDate = processDate;
+		this.depositSum = setAmount(depositSum);
+		this.withdrawSum = setAmount(withdrawSum);
+	}
+
 	public static PointDetail createInitial(String userId) {
 		return new PointDetail(userId);
 	}
@@ -82,7 +100,7 @@ public class PointDetail extends BaseEntity {
 
 		return new PointDetail(
 			amount.negate(),
-			PointType.POINT_USE,
+			PointTransactionType.POINT_USE,
 			this.userId,
 			processDate,
 			processDate.plusYears(1),
@@ -95,20 +113,16 @@ public class PointDetail extends BaseEntity {
 		if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
 			throw new InvalidAmountException();
 		}
-		return new PointDetail(amount, PointType.POINT_ACCUMULATE, this.userId, processDate,
-			processDate.plusYears(1), this.depositSum.add(amount), this.withdrawSum);
-	}
 
-	private PointDetail(BigDecimal amount, PointType pointType, String userId, LocalDateTime processDate,
-		LocalDateTime expireDate,
-		BigDecimal depositSum, BigDecimal withdrawSum) {
-		this.amount = setAmount(amount);
-		this.pointType = pointType;
-		this.expireDate = expireDate;
-		setUserId(userId);
-		this.processDate = processDate;
-		this.depositSum = setAmount(depositSum);
-		this.withdrawSum = setAmount(withdrawSum);
+		return new PointDetail(
+			amount,
+			PointTransactionType.POINT_ACCUMULATE,
+			this.userId,
+			processDate,
+			processDate.plusYears(1),
+			this.depositSum.add(amount),
+			this.withdrawSum
+		);
 	}
 
 	private void setUserId(String userId) {
